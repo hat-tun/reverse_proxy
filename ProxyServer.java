@@ -5,7 +5,7 @@ public class ProxyServer{
     public static void main(String[] args) throws IOException{
 	int HTTP_PORT = 8080;
 	//File dir = new File("c:\\workspace\\Intern");
-	File dir = new File("/home/hat-tun/intern");
+	File dir = new File("/home/hat-tun/intern/reverse_proxy");
 	int numThreads = 5;
 	int cnt = 0;
 	ServerSocket servsock = new ServerSocket(HTTP_PORT);

@@ -5,6 +5,7 @@ import java.util.*;
 public class RequestRedirect implements Runnable{
     private static String webserver ="192.168.74.141";
     private static LinkedList queue = new LinkedList();
+    private static LinkedList ip_queue = new LinkedList();
     private File homeDir;
     public RequestRedirect(File homeDir){
 	this.homeDir = homeDir;
@@ -18,6 +19,10 @@ public class RequestRedirect implements Runnable{
 	}
     }
     
+    public static void registerIP(String ip){
+	ip_queue.addLast(ip);
+    }
+
     public void run(){
 	while(true){
 	    Socket sock;
@@ -62,6 +67,7 @@ public class RequestRedirect implements Runnable{
 		    String ipstr = ip.toString().substring(1);
 		    if(flg){
 			if(version.startsWith("HTTP/")){
+			    //if(indxname.equals("index.html") && busy){ //if busy
 			    if(indxname.equals("index.html") && ipstr.equals("192.168.74.141")){ //check IP
 				Socket sock2 = new Socket(webserver,8000); // connect to web server
 				OutputStream outs2 = new BufferedOutputStream(sock2.getOutputStream());
