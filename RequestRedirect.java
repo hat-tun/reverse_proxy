@@ -43,7 +43,7 @@ public class RequestRedirect implements Runnable{
 		String version;
 		OutputStream outs = new BufferedOutputStream(sock.getOutputStream());
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outs));
-		InputStream in = sock.getInputStream();
+		BufferedInputStream in = new BufferedInputStream(sock.getInputStream());
 		BufferedReader rd;
 		rd = new BufferedReader(new InputStreamReader(in));
 		String get = rd.readLine();
@@ -70,23 +70,19 @@ public class RequestRedirect implements Runnable{
 			    //if(indxname.equals("index.html") && busy){ //if busy
 			    if(indxname.equals("index.html") && ipstr.equals("192.168.74.141")){ //check IP
 				Socket sock2 = new Socket(webserver,8000); // connect to web server
-				OutputStream outs2 = new BufferedOutputStream(sock2.getOutputStream());
+				byte[] buf2 = new byte[(int) 1000];
+				BufferedOutputStream outs2 = new BufferedOutputStream(sock2.getOutputStream());
 				BufferedWriter out2 = new BufferedWriter(new OutputStreamWriter(outs2)); 
 				
 				out2.write("GET /index.html HTTP/1.1 \r\n");
 				out2.flush();
 				
-				InputStream in2 = sock2.getInputStream();
-				BufferedReader rd2;
- 				rd2 = new BufferedReader(new InputStreamReader(in2));
- 				String messege;
-				while((messege = rd2.readLine()) != null){
- 				    //System.out.println(messege);
-				    out.write(messege);
-				    out.newLine(); //abstraction of CR/LF code
-				    out.flush();
-				}
+			 	BufferedInputStream in2 = new BufferedInputStream(sock2.getInputStream());
 				
+				in2.read(buf2);
+				outs.write(buf2);
+				outs.flush();
+
 				sock2.close();
 				
 			    }else if(indxname.equals("dummy.html")){
