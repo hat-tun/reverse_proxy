@@ -5,8 +5,9 @@ import java.util.*;
 public class RequestRedirect implements Runnable{
     private static String webserver ="192.168.74.141";
     private static LinkedList queue = new LinkedList();
-    private static LinkedList ip_queue = new LinkedList();
+
     private File homeDir;
+
     public RequestRedirect(File homeDir){
 	this.homeDir = homeDir;
     }
@@ -19,9 +20,6 @@ public class RequestRedirect implements Runnable{
 	}
     }
     
-    public static void registerIP(String ip){
-	ip_queue.addLast(ip);
-    }
 
     public void run(){
 	while(true){
@@ -37,6 +35,7 @@ public class RequestRedirect implements Runnable{
 		sock = (Socket) queue.removeFirst();
 	    }
 	    try{
+		
 		String filename;
 		String indxname;
 		String contentType;
@@ -49,6 +48,7 @@ public class RequestRedirect implements Runnable{
 		
 		
 		
+
 		Socket sock2 = new Socket(webserver,8000); // connect to web server
 		
 		BufferedOutputStream outs2 = new BufferedOutputStream(sock2.getOutputStream());
@@ -162,3 +162,4 @@ public class RequestRedirect implements Runnable{
 	}
     }
 }
+
