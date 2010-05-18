@@ -5,14 +5,18 @@ import java.util.*;
 public class RequestRedirect implements Runnable{
     private static String webserver ="192.168.74.141";
     private static LinkedList queue = new LinkedList();
+    private static LinkedList ip_queue = new LinkedList();
 
     private File homeDir;
+    private static InetAddress ip_redirect;
+    
+    
 
     public RequestRedirect(File homeDir){
 	this.homeDir = homeDir;
     }
     
-    public static void reqProc(Socket s, int cnt){
+    public static void reqProcRedirect(Socket s, int cnt){
 	synchronized (queue){
 	    queue.addLast(s);
 	    System.out.println("connect:" + cnt + " " + queue);
@@ -47,8 +51,6 @@ public class RequestRedirect implements Runnable{
 		BufferedReader rd;
 		
 		
-		
-
 		Socket sock2 = new Socket(webserver,8000); // connect to web server
 		
 		BufferedOutputStream outs2 = new BufferedOutputStream(sock2.getOutputStream());
@@ -57,29 +59,31 @@ public class RequestRedirect implements Runnable{
 		byte[] buf3 = new byte[1024];
 		// Request Transfer
   		in.read(buf3);//std input stream has no terminal???  So once read.
- 		outs2.write(buf3);
- 		outs2.flush();
+//  		outs2.write(buf3);
+//  		outs2.flush();
 	    
-		int len = 0;
+// 		int len = 0;
 	       
-		byte[] buf2 = new byte[1024];
-		BufferedInputStream in2 = new BufferedInputStream(sock2.getInputStream());
+// 		byte[] buf2 = new byte[1024];
+// 		BufferedInputStream in2 = new BufferedInputStream(sock2.getInputStream());
 		
-		// Response Transfer
-		while((len = in2.read(buf2)) != -1){
-		    outs.write(buf2);
-		    outs.flush();
-		}
+// 		// Response Transfer
+// 		while((len = in2.read(buf2)) != -1){
+// 		    outs.write(buf2);
+// 		    outs.flush();
+// 		}
+
 		
 		
-		outs2.close();
-		in2.close();
-		sock2.close();
+		
+// 		outs2.close();
+// 		//		in2.close();
+// 		sock2.close();
 	      
-		in.close();
-		out.close();
-		outs.close();
-		sock.close();
+// 		in.close();
+// 		out.close();
+// 		outs.close();
+// 		sock.close();
 		
 		
 		String req = new String(buf3);
@@ -99,55 +103,54 @@ public class RequestRedirect implements Runnable{
 		    boolean flg = file.canRead();
 		    Date now = new Date();
 		    InetAddress ip = sock.getLocalAddress();
+
 		    String ipstr = ip.toString().substring(1);
 		    if(flg){
-			//			if(version.startsWith("HTTP/")){
-			    //if(indxname.equals("index.html") && busy){ //if busy
-			    //			    if(ipstr.equals("192.168.74.141")){ //check IP
-			// 	out2.write("GET /index.html HTTP/1.1 \r\n");
-				// 				out2.flush();
-			
-// 			    }else if(indxname.equals("dummy.html")){
-// 				FileInputStream fin = new FileInputStream(file);
-// 				byte[] buf = new byte[(int) file.length()];
-
-// 				fin.read(buf);
-// 				fin.close();
+			if(version.startsWith("HTTP/")){
+			    if(indxname.equals("index.html")){
 				
-// 				out.write("HTTP/1.1 200 OK\r\n");
-// 				out.write("Date: " + now + "\r\n");
-// 				out.write("Server: HTTP 1.1\r\n");
-// 				out.write("Content-length: " + buf.length + "\r\n");
-// 				out.write("Content-type: " + contentType + "\r\n\r\n");
-// 				out.flush();
-				
-// 				outs.write(buf);
-// 				outs.flush();
+				IpTable iptab = IpTable.getFirst();
 
-// 			    }else{
-// 				out.write("HTTP/1.1 302 Found\r\n");
-// 				out.write("Date: " + now + "\r\n");
-// 				out.write("Server: HTTP 1.1\r\n");
-// 				out.write("Location: http://"+webserver+":8080/dummy.html\r\n");
-// 				out.flush();
-// 			    }
+				iptab.printTab(iptab);
+
+				out.write("HTTP/1.1 302 Found\r\n");
+				out.write("Date: " + now + "\r\n");
+				out.write("Server: HTTP 1.1\r\n");
+				out.write("Location: http://"+webserver+":8080/dummy.html\r\n");
+				out.flush();
+			    }else if(indxname.equals("dummy.html")){
+				FileInputStream fin = new FileInputStream(file);
+				byte[] buf = new byte[(int) file.length()];
+
+				fin.read(buf);
+				fin.close();
+				
+				out.write("HTTP/1.1 200 OK\r\n");
+				out.write("Date: " + now + "\r\n");
+				out.write("Server: HTTP 1.1\r\n");
+				out.write("Content-length: " + buf.length + "\r\n");
+				out.write("Content-type: " + contentType + "\r\n\r\n");
+				out.flush();
+				
+				outs.write(buf);
+				outs.flush();
+			    }
 			}
-// 		    }
-// 		    else{
-// 			if(version.startsWith("HTTP/")){
-// 			    out.write("HTTP/1.1 404 File Not Found\r\n");
-// 			    out.write("Date: " + now + "\r\n");
-// 			    out.write("Server: HTTP 1.1\r\n");
-// 			    out.write("Content-type: text/html\r\n\r\n");
-// 			}
-// 			out.write("<HTML>\r\n");
-// 			out.write("<HEAD><TITLE>File Not Found</TITLE>\r\n");
-// 			out.write("</HEAD>\r\n");
-// 			out.write("<BODY>");
-// 			out.write("<H1>HTTP Error 404: File Not Fond</H1>\r\n");
-// 			out.write("</BODY></HTML>\r\n");
-// 			out.flush();
-// 		    }
+		    }else{
+			if(version.startsWith("HTTP/")){
+			    out.write("HTTP/1.1 404 File Not Found\r\n");
+			    out.write("Date: " + now + "\r\n");
+			    out.write("Server: HTTP 1.1\r\n");
+			    out.write("Content-type: text/html\r\n\r\n");
+			}
+			out.write("<HTML>\r\n");
+			out.write("<HEAD><TITLE>File Not Found</TITLE>\r\n");
+			out.write("</HEAD>\r\n");
+			out.write("<BODY>");
+			out.write("<H1>HTTP Error 404: File Not Fond</H1>\r\n");
+			out.write("</BODY></HTML>\r\n");
+			out.flush();
+		    }
 		}
 	    }
 	    catch(IOException e) {

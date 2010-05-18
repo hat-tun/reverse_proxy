@@ -4,8 +4,9 @@ import java.util.*;
 
 public class ProxyServer{
 
-    private static LinkedList ip_queue = new LinkedList();
+
     private static int numTasks = 0;
+
 
     private static class CheckTime extends TimerTask{
 	public void run(){
@@ -26,19 +27,24 @@ public class ProxyServer{
 	ServerSocket servsock = new ServerSocket(HTTP_PORT);
 	
 	for(int i = 1; i < numThreads; i++){
-	    RequestRedirect req = new RequestRedirect(dir);
+	    RequestPassThrough req = new RequestPassThrough(dir);
 	    Thread t = new Thread(req);
 	    t.start();
 	}
+
+	for(int i = 1; i < numThreads; i++){
+	    RequestRedirect req2 = new RequestRedirect(dir);
+	    Thread t2 = new Thread(req2);
+	    t2.start();
+	}
+
 	
 	System.out.println("port" + servsock.getLocalPort());
 	
 	TimerTask task = new CheckTime();
 	Timer timer = new Timer();
 
-	timer.schedule(task,0,5000);
-	
-	
+	timer.schedule(task,0,5000);// init in 5sec interval
 	
 	while(true){
 	    try{
@@ -46,11 +52,11 @@ public class ProxyServer{
 		cnt++;
 		numTasks++;
 		System.out.println("task = "+numTasks);
-		if(numTasks > 5){
+		if(numTasks > 3){
 		    System.out.println("Overflow");
+		    RequestRedirect.reqProcRedirect(sock, cnt);
 		}else{
-		    RequestRedirect.reqProc(sock, cnt);
-		    
+		    RequestPassThrough.reqProc(sock, cnt);
 		}
 	    }
 	    catch (IOException e){
