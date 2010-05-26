@@ -5,12 +5,7 @@ import java.util.*;
 public class RequestRedirect implements Runnable{
     private static String webserver ="192.168.74.141";
     private static LinkedList queue = new LinkedList();
-    private static LinkedList ip_queue = new LinkedList();
-
     private File homeDir;
-    private static InetAddress ip_redirect;
-    
-    
 
     public RequestRedirect(File homeDir){
 	this.homeDir = homeDir;
@@ -23,7 +18,6 @@ public class RequestRedirect implements Runnable{
 	    queue.notifyAll();
 	}
     }
-    
 
     public void run(){
 	while(true){
@@ -51,45 +45,14 @@ public class RequestRedirect implements Runnable{
 		BufferedReader rd;
 		
 		
-		Socket sock2 = new Socket(webserver,8000); // connect to web server
-		
-		BufferedOutputStream outs2 = new BufferedOutputStream(sock2.getOutputStream());
-		//BufferedWriter out2 = new BufferedWriter(new OutputStreamWriter(outs2)); 
-		
 		byte[] buf3 = new byte[1024];
-		// Request Transfer
+		// Request Analysis
   		in.read(buf3);//std input stream has no terminal???  So once read.
-//  		outs2.write(buf3);
-//  		outs2.flush();
-	    
-// 		int len = 0;
-	       
-// 		byte[] buf2 = new byte[1024];
-// 		BufferedInputStream in2 = new BufferedInputStream(sock2.getInputStream());
-		
-// 		// Response Transfer
-// 		while((len = in2.read(buf2)) != -1){
-// 		    outs.write(buf2);
-// 		    outs.flush();
-// 		}
-
-		
-		
-		
-// 		outs2.close();
-// 		//		in2.close();
-// 		sock2.close();
-	      
-// 		in.close();
-// 		out.close();
-// 		outs.close();
-// 		sock.close();
-		
 		
 		String req = new String(buf3);
 		String[] request = req.split("\r\n");
 		String get = request[0];
-		buf3 = null;		
+
 		StringTokenizer st = new StringTokenizer(get);
 		String method = st.nextToken();
 		if(method.equals("GET")){
@@ -107,21 +70,10 @@ public class RequestRedirect implements Runnable{
 		    String ipstr = ip.toString().substring(1);
 		    if(flg){
 			if(version.startsWith("HTTP/")){
-			    if(indxname.equals("index.html")){
-				
-				IpTable iptab = IpTable.getFirst();
-
-				iptab.printTab(iptab);
-
-				out.write("HTTP/1.1 302 Found\r\n");
-				out.write("Date: " + now + "\r\n");
-				out.write("Server: HTTP 1.1\r\n");
-				out.write("Location: http://"+webserver+":8080/dummy.html\r\n");
-				out.flush();
-			    }else if(indxname.equals("dummy.html")){
+			    if(indxname.equals("dummy.html")){ // deny endless loop
 				FileInputStream fin = new FileInputStream(file);
 				byte[] buf = new byte[(int) file.length()];
-
+				
 				fin.read(buf);
 				fin.close();
 				
@@ -134,6 +86,18 @@ public class RequestRedirect implements Runnable{
 				
 				outs.write(buf);
 				outs.flush();
+				
+			    }else{ //Redirect
+				
+				IpTable iptab = IpTable.getFirst();
+
+				iptab.printTab(iptab);
+
+				out.write("HTTP/1.1 302 Found\r\n");
+				out.write("Date: " + now + "\r\n");
+				out.write("Server: HTTP 1.1\r\n");
+				out.write("Location: http://"+webserver+":8080/dummy.html\r\n");
+				out.flush();
 			    }
 			}
 		    }else{
@@ -151,6 +115,13 @@ public class RequestRedirect implements Runnable{
 			out.write("</BODY></HTML>\r\n");
 			out.flush();
 		    }
+		
+		    in.close();
+		    out.close();
+		    outs.close();
+		    sock.close();
+		    
+		    
 		}
 	    }
 	    catch(IOException e) {

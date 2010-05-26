@@ -5,12 +5,7 @@ import java.util.*;
 public class RequestPassThrough implements Runnable{
     private static String webserver ="192.168.74.141";
     private static LinkedList queue = new LinkedList();
-    private static LinkedList ip_queue = new LinkedList();
-
     private File homeDir;
-    private static InetAddress ip_redirect;
-    
-    
 
     public RequestPassThrough(File homeDir){
 	this.homeDir = homeDir;
@@ -24,7 +19,6 @@ public class RequestPassThrough implements Runnable{
 	}
     }
     
-
     public void run(){
 	while(true){
 	    Socket sock;
@@ -49,15 +43,14 @@ public class RequestPassThrough implements Runnable{
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outs));
 		BufferedInputStream in = new BufferedInputStream(sock.getInputStream());
 		BufferedReader rd;
-		
-		
+				
 		Socket sock2 = new Socket(webserver,8000); // connect to web server
 		
 		BufferedOutputStream outs2 = new BufferedOutputStream(sock2.getOutputStream());
-		//BufferedWriter out2 = new BufferedWriter(new OutputStreamWriter(outs2)); 
 		
 		byte[] buf3 = new byte[1024];
 		byte[] buf4 = new byte[1024];
+
 		// Request Transfer
   		in.read(buf3);//std input stream has no terminal???  So once read.
 	    
@@ -65,8 +58,8 @@ public class RequestPassThrough implements Runnable{
 		
 		String req = new String(buf3);
 		String[] request = req.split("\r\n");
-		String get = request[0];
-		buf3 = null;		
+		String get = request[0]; //first line fetch
+		
 		StringTokenizer st = new StringTokenizer(get);
 		String method = st.nextToken();
 		if(method.equals("GET")){
@@ -85,33 +78,8 @@ public class RequestPassThrough implements Runnable{
 
 		    String ipstr = ip.toString().substring(1);
 		    if(flg){
-			
 			if(version.startsWith("HTTP/")){
-			    if(indxname.equals("index.html")){
-				
-				outs2.write(buf4);
-				outs2.flush();
-				
-				int len = 0;
-				
-				byte[] buf2 = new byte[1024];
-				BufferedInputStream in2 = new BufferedInputStream(sock2.getInputStream());
-				
-				// Response Transfer
-				while((len = in2.read(buf2)) != -1){
-				    outs.write(buf2);
-				    outs.flush();
-				}
-
-				if(iptab.size() > 3){
-				    iptab.removeFirst();
-				}
-				iptab.addLast(iptab);
-
-				
-				in2.close();
-				
-			    }else if(indxname.equals("dummy.html")){
+			    if(indxname.equals("dummy.html")){ // if dummy request
 				FileInputStream fin = new FileInputStream(file);
 				byte[] buf = new byte[(int) file.length()];
 
@@ -127,7 +95,7 @@ public class RequestPassThrough implements Runnable{
 				
 				outs.write(buf);
 				outs.flush();
-			    }else{//for image file
+			    }else{ // other files including image
 				outs2.write(buf4);
 				outs2.flush();
 				
@@ -142,6 +110,7 @@ public class RequestPassThrough implements Runnable{
 				    outs.flush();
 				}
 
+				//iptab register
 				if(iptab.size() > 3){
 				    iptab.removeFirst();
 				}
@@ -167,8 +136,8 @@ public class RequestPassThrough implements Runnable{
 			    out.flush();
 			}
 		    }
+		    //close sockets
 		    outs2.close();
-
 		    sock2.close();
 		    
 		    in.close();

@@ -26,7 +26,7 @@ public class ProxyServer{
 
 	ServerSocket servsock = new ServerSocket(HTTP_PORT);
 	
-	for(int i = 1; i < numThreads; i++){
+      	for(int i = 1; i < numThreads; i++){
 	    RequestPassThrough req = new RequestPassThrough(dir);
 	    Thread t = new Thread(req);
 	    t.start();

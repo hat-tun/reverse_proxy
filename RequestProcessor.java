@@ -59,19 +59,16 @@ public class RequestProcessor implements Runnable{
 			fin.read(buf);
 			fin.close();
 			if(version.startsWith("HTTP/")){
-			    if(indxname.equals("index.html")){ // if you access "index.html" ,redirect!
-				out.write("HTTP/1.1 200 OK\r\n");
-				out.write("Date: " + now + "\r\n");
-				out.write("Server: HTTP 1.1\r\n");
-				out.write("Content-length: " + buf.length + "\r\n");
-				out.write("Content-type: " + contentType + "\r\n\r\n");
-				out.flush();
-			    }
+			    out.write("HTTP/1.1 200 OK\r\n");
+			    out.write("Date: " + now + "\r\n");
+			    out.write("Server: HTTP 1.1\r\n");
+			    out.write("Content-length: " + buf.length + "\r\n");
+			    out.write("Content-type: " + contentType + "\r\n\r\n");
+			    out.flush();
 			}
 			outs.write(buf);
 			outs.flush();
-		    }
-		    else{
+		    }else{
 			if(version.startsWith("HTTP/")){
 			    out.write("HTTP/1.1 404 File Not Found\r\n");
 			    out.write("Date: " + now + "\r\n");
