@@ -31,7 +31,7 @@ public class Client{
 	    try{
 		Socket sock = servsock.accept();
 		cnt++;
-		RequestProcessor.reqProc(sock, cnt);
+		ClientProcessor.reqProc(sock, cnt);
 	    }
 	    catch (IOException e){
 		e.printStackTrace();
@@ -61,12 +61,12 @@ class ClientRequester implements Runnable{
 		int port = url.getPort();
 		String path = url.getPath();
 		
-		Socket sock = new Socket(host, port);
+		Socket sock2 = new Socket(host, port);
 		
 		
 		
 	    
-		OutputStream outs = new BufferedOutputStream(sock.getOutputStream());
+		OutputStream outs = new BufferedOutputStream(sock2.getOutputStream());
 		Writer out = new OutputStreamWriter(outs);
 		
 		out.write("GET "+ path + " HTTP/1.1\r\n");
@@ -74,7 +74,7 @@ class ClientRequester implements Runnable{
 		out.write("\r\n");
 		out.flush();
 		
-		InputStream in = sock.getInputStream();
+		InputStream in = sock2.getInputStream();
 		BufferedReader rd = new BufferedReader(new InputStreamReader(in));
 		String get;
 		while(true){
@@ -84,12 +84,16 @@ class ClientRequester implements Runnable{
 		    }
 		    System.out.println(get);
 		}
-		sock.close();
-		
+		out.close();
+		outs.close();
+		in.close();
+		sock2.close();
 	    }catch(UnknownHostException e){
 		
 	    }catch(IOException e){
+		
 	    }catch(IllegalArgumentException e){
+		
 	    }
 	}	    
     }
