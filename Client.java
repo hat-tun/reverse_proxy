@@ -1,6 +1,8 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.util.regex.*;
+
 
 public class Client{
     public static void main(String[] args) throws IOException{
@@ -22,7 +24,7 @@ public class Client{
 	Thread t2 = new Thread(req2);
 	t2.start();
 	
-	
+
 	
 
 	System.out.println("ip" + InetAddress.getLocalHost().getHostAddress() + " port" + servsock.getLocalPort());
@@ -64,107 +66,66 @@ class ClientRequester implements Runnable{
 		String path = url.getPath();
 
 		HttpURLConnection urlconn = (HttpURLConnection)url.openConnection();
-		
-<<<<<<< HEAD:Client.java
+
 		urlconn.setRequestMethod("GET");
 		urlconn.connect();
-
-
 		
-			
-		//		BufferedInputStream in = new BufferedInputStream(urlconn.getInputStream());
-		BufferedReader rd = new BufferedReader(new InputStreamReader(urlconn.getInputStream()));
 		File html_file = new File(homeDir + path);
-		int k;
-		String get;
-		byte[] buf = new byte[1024];
-=======
-		Socket sock2 = new Socket(host, port);
-		
-		
-		
-	    
-		OutputStream outs = new BufferedOutputStream(sock2.getOutputStream());
-		Writer out = new OutputStreamWriter(outs);
->>>>>>> 237ead82b8b43d6557a83f831223d33cb4aeca8e:Client.java
-		
 		PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter(html_file)));
 		
-<<<<<<< HEAD:Client.java
-// 		while(true){
-// 		    k=in.read(buf);
-// 		    if(k == -1){
-// 			break;
-// 		    }
-// 		    get = new String(buf);
-		    
-		    
-// 		    System.out.println(get);
-// 		    fout.write(buf,0,k);
-// 		    fout.flush();
-// 		}
-
-=======
-		InputStream in = sock2.getInputStream();
-		BufferedReader rd = new BufferedReader(new InputStreamReader(in));
-		String get;
->>>>>>> 237ead82b8b43d6557a83f831223d33cb4aeca8e:Client.java
+		BufferedReader rd = new BufferedReader(new InputStreamReader(urlconn.getInputStream()));
+		
+		String[] imgs = new String[10];
+		int i = 0;
 		while(true){
 		    String line = rd.readLine();
 		    if(line == null){
 			break;
 		    }
-		    pw.println(line);
+		    Pattern p = Pattern.compile("^<img src = \"(test\\d*.gif)\" width=100 height=100>$");
+		    Matcher m = p.matcher(line);
+		    if(m.find()){
+			imgs[i] = m.group(1);
+			i++;
+		    }
 		    System.out.println(line);
+		    pw.println(line);
 		}
-<<<<<<< HEAD:Client.java
+		
 		pw.close();
 		
-		// 		BufferedOutputStream outs = new BufferedOutputStream(sock.getOutputStream());
-		// 		Writer out = new OutputStreamWriter(outs);
-
-		// 		out.write("GET "+ path + " HTTP/1.1\r\n");
-		// 		out.write("Host:" + host +":"+port + "\r\n");
-		// 		out.write("\r\n");
-		// 		out.flush();
-
-		// 		BufferedInputStream in = new BufferedInputStream(sock.getInputStream());
-		// 		BufferedReader rd = new BufferedReader(new InputStreamReader(in));
-		// 		String get;
-		// 		File html_file = new File(homeDir + path);
-		// 		int k;
-		// 		byte[] buf = new byte[1024];
-
-		// 		FileOutputStream fout = new FileOutputStream(html_file);
-
-		// 		while(true){
-		// 		    k= in.read(buf);
-		// 		    if(k == -1){
-		// 			break;
-		// 		    }
-		// 		    get = new String(buf);
-
-
-		// 		    System.out.println(get);
-		// 		    fout.write(buf,0,k);
-		// 		    fout.flush();
-		// 		}
-
-			// 	while(true){
-		// 		    get= rd.readLine();
-		// 		    if(get == null){
-		// 			break;
-		// 		    }
-		// 		    System.out.println(get);
-		// 		}
-		//				sock.close();
+		while(true){
+		    if(i==0){
+			break;
+		    }else{	
+			String img_path = imgs[i-1];
+			//System.out.println("imgpath = "+ img_path );
+			i--;
+			URL url_img = new URL("http://"+host+":"+port +"/"+ img_path);
+			HttpURLConnection urlconn2 = (HttpURLConnection)url_img.openConnection();
+			
+			urlconn2.setRequestMethod("GET");
+			urlconn2.connect();
+			
+			BufferedInputStream in = new BufferedInputStream(urlconn2.getInputStream());
+			File img_file = new File(homeDir +"/"+ img_path);
+			BufferedOutputStream out = new BufferedOutputStream (new FileOutputStream(img_file));
+			int k;
+			byte[] buf = new byte[1024];
+			//System.out.println("debug");
+			while(true){
+			    k=in.read(buf);
+			    if(k == -1){
+				break;
+			    }
+			    out.write(buf,0,k);
+			    out.flush();
+			}
+			out.close();
+		    }
+		}
 		
-=======
-		out.close();
-		outs.close();
-		in.close();
-		sock2.close();
->>>>>>> 237ead82b8b43d6557a83f831223d33cb4aeca8e:Client.java
+
 	    }catch(UnknownHostException e){
 		
 	    }catch(IOException e){
