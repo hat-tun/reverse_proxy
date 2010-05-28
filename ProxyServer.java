@@ -15,8 +15,8 @@ public class ProxyServer{
 
     public static void main(String[] args) throws IOException{
 	int HTTP_PORT = 8080;
-	File dir = new File("c:\\workspace\\Intern");
-	//File dir = new File("/home/hat-tun/intern/reverse_proxy");
+	//File dir = new File("c:\\workspace\\Intern");
+	File dir = new File("/home/hat-tun/intern/reverse_proxy");
 	int numThreads = 5;
 	int cnt = 0;
 	ServerSocket servsock = new ServerSocket(HTTP_PORT);	
@@ -59,8 +59,8 @@ public class ProxyServer{
 }															
 
 class RequestPassThrough implements Runnable{
-    private static String webserver ="10.228.155.194";
-    //private static String webserver ="192.168.74.141";
+    //private static String webserver ="10.228.155.194";
+    private static String webserver ="192.168.74.141";
     private static int HTTP_PORT = 8000;
     private static int max_size = 3;
     private static LinkedList queue = new LinkedList();
