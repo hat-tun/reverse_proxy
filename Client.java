@@ -82,7 +82,7 @@ class ClientRequester implements Runnable{
 		    if(line == null){
 			break;
 		    }
-		    Pattern p = Pattern.compile("^<img src = \"(.*\\.gif)\" .*>$");//regular expression
+		    Pattern p = Pattern.compile("<img src.*\"(.*\\.(gif|jpeg))\".*>");//regular expression
 		    Matcher m = p.matcher(line);
 		    if(m.find()){
 			imgs[i] = m.group(1); //saving img file name
