@@ -8,7 +8,7 @@ public class Client{
     public static void main(String[] args) throws IOException{
 
 	//File dir = new File("c:\\workspace\\Intern");
-	File dir = new File("/home/hat-tun/intern/reverse_proxy");
+	File dir = new File("/home/hat-tun/intern/reverse_proxy/cache");
 	int numThreads = 5;
 	int cnt = 0;
 	int HTTP_PORT = 8008;
@@ -49,7 +49,7 @@ public class Client{
 
 class ClientRequester implements Runnable{
     
-    private File homeDir = new File("/home/hat-tun/intern/reverse_proxy/cache");
+    private File cacheDir = new File("/home/hat-tun/intern/reverse_proxy/cache");
 
     public void run(){
 	while(true){
@@ -70,22 +70,22 @@ class ClientRequester implements Runnable{
 		urlconn.setRequestMethod("GET");
 		urlconn.connect();
 		
-		File html_file = new File(homeDir + path);
+		File html_file = new File(cacheDir + path);
 		PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter(html_file)));
 		
 		BufferedReader rd = new BufferedReader(new InputStreamReader(urlconn.getInputStream()));
 		
-		String[] imgs = new String[10];
+		String[] imgs = new String[100];
 		int i = 0;
 		while(true){
 		    String line = rd.readLine();
 		    if(line == null){
 			break;
 		    }
-		    Pattern p = Pattern.compile("^<img src = \"(test\\d*.gif)\" width=100 height=100>$");
+		    Pattern p = Pattern.compile("^<img src = \"(.*\\.gif)\" .*>$");//regular expression
 		    Matcher m = p.matcher(line);
 		    if(m.find()){
-			imgs[i] = m.group(1);
+			imgs[i] = m.group(1); //saving img file name
 			i++;
 		    }
 		    System.out.println(line);
@@ -108,7 +108,7 @@ class ClientRequester implements Runnable{
 			urlconn2.connect();
 			
 			BufferedInputStream in = new BufferedInputStream(urlconn2.getInputStream());
-			File img_file = new File(homeDir +"/"+ img_path);
+			File img_file = new File(cacheDir +"/"+ img_path);
 			BufferedOutputStream out = new BufferedOutputStream (new FileOutputStream(img_file));
 			int k;
 			byte[] buf = new byte[1024];
