@@ -47,6 +47,8 @@ public class Client{
 
 class ClientRequester implements Runnable{
     
+    private File homeDir = new File("/home/hat-tun/intern/reverse_proxy/cache");
+
     public void run(){
 	while(true){
 	    try{
@@ -60,31 +62,85 @@ class ClientRequester implements Runnable{
 		String host = url.getHost();
 		int port = url.getPort();
 		String path = url.getPath();
+
+		HttpURLConnection urlconn = (HttpURLConnection)url.openConnection();
 		
-		Socket sock = new Socket(host, port);
+		urlconn.setRequestMethod("GET");
+		urlconn.connect();
+
+
 		
-		
-		
-	    
-		OutputStream outs = new BufferedOutputStream(sock.getOutputStream());
-		Writer out = new OutputStreamWriter(outs);
-		
-		out.write("GET "+ path + " HTTP/1.1\r\n");
-		out.write("Host:" + host +":"+port + "\r\n");
-		out.write("\r\n");
-		out.flush();
-		
-		InputStream in = sock.getInputStream();
-		BufferedReader rd = new BufferedReader(new InputStreamReader(in));
+			
+		//		BufferedInputStream in = new BufferedInputStream(urlconn.getInputStream());
+		BufferedReader rd = new BufferedReader(new InputStreamReader(urlconn.getInputStream()));
+		File html_file = new File(homeDir + path);
+		int k;
 		String get;
+		byte[] buf = new byte[1024];
+		
+		PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter(html_file)));
+		
+// 		while(true){
+// 		    k=in.read(buf);
+// 		    if(k == -1){
+// 			break;
+// 		    }
+// 		    get = new String(buf);
+		    
+		    
+// 		    System.out.println(get);
+// 		    fout.write(buf,0,k);
+// 		    fout.flush();
+// 		}
+
 		while(true){
-		    get= rd.readLine();
-		    if(get == null){
+		    String line = rd.readLine();
+		    if(line == null){
 			break;
 		    }
-		    System.out.println(get);
+		    pw.println(line);
+		    System.out.println(line);
 		}
-		sock.close();
+		pw.close();
+		
+		// 		BufferedOutputStream outs = new BufferedOutputStream(sock.getOutputStream());
+		// 		Writer out = new OutputStreamWriter(outs);
+
+		// 		out.write("GET "+ path + " HTTP/1.1\r\n");
+		// 		out.write("Host:" + host +":"+port + "\r\n");
+		// 		out.write("\r\n");
+		// 		out.flush();
+
+		// 		BufferedInputStream in = new BufferedInputStream(sock.getInputStream());
+		// 		BufferedReader rd = new BufferedReader(new InputStreamReader(in));
+		// 		String get;
+		// 		File html_file = new File(homeDir + path);
+		// 		int k;
+		// 		byte[] buf = new byte[1024];
+
+		// 		FileOutputStream fout = new FileOutputStream(html_file);
+
+		// 		while(true){
+		// 		    k= in.read(buf);
+		// 		    if(k == -1){
+		// 			break;
+		// 		    }
+		// 		    get = new String(buf);
+
+
+		// 		    System.out.println(get);
+		// 		    fout.write(buf,0,k);
+		// 		    fout.flush();
+		// 		}
+
+			// 	while(true){
+		// 		    get= rd.readLine();
+		// 		    if(get == null){
+		// 			break;
+		// 		    }
+		// 		    System.out.println(get);
+		// 		}
+		//				sock.close();
 		
 	    }catch(UnknownHostException e){
 		
