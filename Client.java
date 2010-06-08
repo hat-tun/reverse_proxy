@@ -31,7 +31,7 @@ public class Client{
 	    try{
 		Socket sock = servsock.accept();
 		cnt++;
-		RequestProcessor.reqProc(sock, cnt);
+		ClientProcessor.reqProc(sock, cnt);
 	    }
 	    catch (IOException e){
 		e.printStackTrace();
@@ -65,6 +65,7 @@ class ClientRequester implements Runnable{
 
 		HttpURLConnection urlconn = (HttpURLConnection)url.openConnection();
 		
+<<<<<<< HEAD:Client.java
 		urlconn.setRequestMethod("GET");
 		urlconn.connect();
 
@@ -77,9 +78,19 @@ class ClientRequester implements Runnable{
 		int k;
 		String get;
 		byte[] buf = new byte[1024];
+=======
+		Socket sock2 = new Socket(host, port);
+		
+		
+		
+	    
+		OutputStream outs = new BufferedOutputStream(sock2.getOutputStream());
+		Writer out = new OutputStreamWriter(outs);
+>>>>>>> 237ead82b8b43d6557a83f831223d33cb4aeca8e:Client.java
 		
 		PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter(html_file)));
 		
+<<<<<<< HEAD:Client.java
 // 		while(true){
 // 		    k=in.read(buf);
 // 		    if(k == -1){
@@ -93,6 +104,11 @@ class ClientRequester implements Runnable{
 // 		    fout.flush();
 // 		}
 
+=======
+		InputStream in = sock2.getInputStream();
+		BufferedReader rd = new BufferedReader(new InputStreamReader(in));
+		String get;
+>>>>>>> 237ead82b8b43d6557a83f831223d33cb4aeca8e:Client.java
 		while(true){
 		    String line = rd.readLine();
 		    if(line == null){
@@ -101,6 +117,7 @@ class ClientRequester implements Runnable{
 		    pw.println(line);
 		    System.out.println(line);
 		}
+<<<<<<< HEAD:Client.java
 		pw.close();
 		
 		// 		BufferedOutputStream outs = new BufferedOutputStream(sock.getOutputStream());
@@ -142,10 +159,18 @@ class ClientRequester implements Runnable{
 		// 		}
 		//				sock.close();
 		
+=======
+		out.close();
+		outs.close();
+		in.close();
+		sock2.close();
+>>>>>>> 237ead82b8b43d6557a83f831223d33cb4aeca8e:Client.java
 	    }catch(UnknownHostException e){
 		
 	    }catch(IOException e){
+		
 	    }catch(IllegalArgumentException e){
+		
 	    }
 	}	    
     }

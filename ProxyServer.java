@@ -61,6 +61,7 @@ public class ProxyServer{
 class RequestPassThrough implements Runnable{
     //private static String webserver ="10.228.155.194";
     private static String webserver ="192.168.74.141";
+    //private static String webserver ="10.228.109.120";
     private static int HTTP_PORT = 8000;
     private static int max_size = 3;
     private static LinkedList queue = new LinkedList();
@@ -155,8 +156,8 @@ class RequestPassThrough implements Runnable{
 }
 
 class RequestRedirect implements Runnable{
-    private static String webserver ="10.228.155.83";
-    //private static String webserver ="192.168.74.141";
+    //private static String webserver ="10.228.155.83";
+    private static String webserver ="192.168.74.141";
     private static int HTTP_PORT = 8080;
     private static LinkedList queue = new LinkedList();
     private File homeDir;
