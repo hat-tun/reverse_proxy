@@ -65,12 +65,31 @@ class ClientRequester implements Runnable{
 		int port = url.getPort();
 		String path = url.getPath();
 
+		int delm = path.lastIndexOf("/");
+		String directory = "";
+		String file_name;
+		if(delm != -1 && delm != 0){
+		    directory = path.substring(1,delm);
+		    file_name = path.substring(delm+1);
+		    System.out.println("host = "+ host +"port = " + port+ "dir = "+ directory +"file= " + file_name);
+		}else{
+		    file_name = path.substring(1);
+		    System.out.println("host = "+ host +"port = " + port+ "file= " + file_name);
+		}
+
+
 		HttpURLConnection urlconn = (HttpURLConnection)url.openConnection();
 
 		urlconn.setRequestMethod("GET");
 		urlconn.connect();
 		
-		File html_file = new File(cacheDir + path);
+		File html_dir = new File(cacheDir + "/" + directory);
+		boolean flg = html_dir.canRead();
+		if(!flg){ // if a directory does not exist
+		    html_dir.mkdirs();
+		}
+		File html_file = new File(cacheDir + "/" + directory + "/" + file_name);
+		
 		PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter(html_file)));
 		
 		BufferedReader rd = new BufferedReader(new InputStreamReader(urlconn.getInputStream()));
@@ -82,7 +101,7 @@ class ClientRequester implements Runnable{
 		    if(line == null){
 			break;
 		    }
-		    Pattern p = Pattern.compile("<img src.*\"(.*\\.(gif|jpeg))\".*>");//regular expression
+		    Pattern p = Pattern.compile("<img src.*\"(.*\\.(gif|jpeg))\".*>");//img files
 		    Matcher m = p.matcher(line);
 		    if(m.find()){
 			imgs[i] = m.group(1); //saving img file name
@@ -99,7 +118,7 @@ class ClientRequester implements Runnable{
 			break;
 		    }else{	
 			String img_path = imgs[i-1];
-			//System.out.println("imgpath = "+ img_path );
+			System.out.println("imgpath = "+ img_path );
 			i--;
 			URL url_img = new URL("http://"+host+":"+port +"/"+ img_path);
 			HttpURLConnection urlconn2 = (HttpURLConnection)url_img.openConnection();
