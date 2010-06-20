@@ -54,7 +54,7 @@ class ClientRequester implements Runnable{
     public void run(){
 	while(true){
 	    try{
-		BufferedReader r = new BufferedReader(new InputStreamReader(System.in), 1);
+		BufferedReader r = new BufferedReader(new InputStreamReader(System.in), 1); // standard input
 		URL url;
 		
 		System.out.print("URL > ");
@@ -88,23 +88,28 @@ class ClientRequester implements Runnable{
 		if(!flg){ // if a directory does not exist
 		    html_dir.mkdirs();
 		}
-		File html_file = new File(cacheDir + "/" + directory + "/" + file_name);
+		File html_file = new File(html_dir+ "/" + file_name);
 		
-		PrintWriter pw = new PrintWriter(new BufferedWriter (new FileWriter(html_file)));
+		PrintWriter pw = new PrintWriter(new OutputStreamWriter (new FileOutputStream(html_file)));
+		BufferedReader rd = new BufferedReader(new InputStreamReader(urlconn.getInputStream(),"JISAutoDetect")); //auto charset
 		
-		BufferedReader rd = new BufferedReader(new InputStreamReader(urlconn.getInputStream()));
-		
-		String[] imgs = new String[100];
+		String[] objs = new String[100];
 		int i = 0;
 		while(true){
 		    String line = rd.readLine();
 		    if(line == null){
 			break;
 		    }
-		    Pattern p = Pattern.compile("<img src.*\"(.*\\.(gif|jpeg))\".*>");//img files
+		    Pattern p = Pattern.compile("<img src.*\"(.*\\.(gif|jpeg|png))\".*>");//img files
+		    Pattern p2 = Pattern.compile("<link rel.*=.*\"stylesheet\".* href=\"(.*\\.css)\".*>");//css files
 		    Matcher m = p.matcher(line);
+		    Matcher m2 = p2.matcher(line);
 		    if(m.find()){
-			imgs[i] = m.group(1); //saving img file name
+			objs[i] = m.group(1); //saving img file name
+			i++;
+		    }
+		    if(m2.find()){
+			objs[i] = m2.group(1); //saving css file name
 			i++;
 		    }
 		    System.out.println(line);
@@ -117,18 +122,36 @@ class ClientRequester implements Runnable{
 		    if(i==0){
 			break;
 		    }else{	
-			String img_path = imgs[i-1];
-			System.out.println("imgpath = "+ img_path );
+			String obj_path = objs[i-1];
+			System.out.println("objpath = "+ obj_path );
 			i--;
-			URL url_img = new URL("http://"+host+":"+port +"/"+ img_path);
-			HttpURLConnection urlconn2 = (HttpURLConnection)url_img.openConnection();
+
+			URL url_obj = new URL("http://"+host+":"+port +"/"+directory+"/"+ obj_path);
+			HttpURLConnection urlconn2 = (HttpURLConnection)url_obj.openConnection();
 			
 			urlconn2.setRequestMethod("GET");
 			urlconn2.connect();
 			
 			BufferedInputStream in = new BufferedInputStream(urlconn2.getInputStream());
-			File img_file = new File(cacheDir +"/"+ img_path);
-			BufferedOutputStream out = new BufferedOutputStream (new FileOutputStream(img_file));
+			
+			delm = obj_path.lastIndexOf("/");
+			String sub_directory = "";
+			if(delm != -1 && delm != 0){
+			    sub_directory = obj_path.substring(0,delm);
+			    file_name = obj_path.substring(delm+1);
+			}else{
+			    file_name = obj_path.substring(0);
+			}
+			
+			File obj_dir = new File(cacheDir + "/" + directory + "/" +sub_directory);
+			flg = obj_dir.canRead();
+			if(!flg){ // if a directory does not exist
+			    obj_dir.mkdirs();
+			}
+			
+			File obj_file = new File(cacheDir + "/" + directory + "/" +sub_directory + "/" + file_name);
+			
+			BufferedOutputStream out = new BufferedOutputStream (new FileOutputStream(obj_file));
 			int k;
 			byte[] buf = new byte[1024];
 			//System.out.println("debug");
