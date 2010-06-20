@@ -70,7 +70,7 @@ class RequestProcessor implements Runnable{
 		Writer out = new OutputStreamWriter(outs);
 		InputStream in = sock.getInputStream();
 		BufferedReader rd;
-		rd = new BufferedReader(new InputStreamReader(in));
+		rd = new BufferedReader(new InputStreamReader(in,"JISAutoDetect"));
 		String get = rd.readLine();
 		StringTokenizer st = new StringTokenizer(get);
 		String method = st.nextToken();
@@ -81,6 +81,7 @@ class RequestProcessor implements Runnable{
 		    version = st.nextToken();
 		    //String adr = homeDir + "\\" + indxname;
 		    String adr = homeDir + "/" + indxname;
+		    //System.out.println("adr:" + adr);
 		    File file = new File(adr);
 		    boolean flg = file.canRead();
 		    Date now = new Date();
