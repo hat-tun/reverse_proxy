@@ -60,7 +60,15 @@ class ClientRequester implements Runnable{
 		System.out.print("URL > ");
 		String input = r.readLine();
 		url = new URL(input);
+
+		HttpURLConnection urlconn = (HttpURLConnection)url.openConnection();
+
+		urlconn.setRequestMethod("GET");
+		urlconn.connect();
 		
+
+		
+
 		String host = url.getHost();
 		int port = url.getPort();
 		String path = url.getPath();
@@ -68,21 +76,13 @@ class ClientRequester implements Runnable{
 		int delm = path.lastIndexOf("/");
 		String directory = "";
 		String file_name;
-		if(delm != -1 && delm != 0){
+		if(delm != -1 && delm != 0){// if path file does not exist in homeDir
 		    directory = path.substring(1,delm);
 		    file_name = path.substring(delm+1);
-		    System.out.println("host = "+ host +"port = " + port+ "dir = "+ directory +"file= " + file_name);
 		}else{
 		    file_name = path.substring(1);
-		    System.out.println("host = "+ host +"port = " + port+ "file= " + file_name);
 		}
 
-
-		HttpURLConnection urlconn = (HttpURLConnection)url.openConnection();
-
-		urlconn.setRequestMethod("GET");
-		urlconn.connect();
-		
 		File html_dir = new File(cacheDir + "/" + directory);
 		boolean flg = html_dir.canRead();
 		if(!flg){ // if a directory does not exist
@@ -118,12 +118,11 @@ class ClientRequester implements Runnable{
 		
 		pw.close();
 		
-		while(true){
+		while(true){ // download object files
 		    if(i==0){
 			break;
 		    }else{	
 			String obj_path = objs[i-1];
-			System.out.println("objpath = "+ obj_path );
 			i--;
 
 			URL url_obj = new URL("http://"+host+":"+port +"/"+directory+"/"+ obj_path);
@@ -148,13 +147,11 @@ class ClientRequester implements Runnable{
 			if(!flg){ // if a directory does not exist
 			    obj_dir.mkdirs();
 			}
-			
 			File obj_file = new File(cacheDir + "/" + directory + "/" +sub_directory + "/" + file_name);
 			
 			BufferedOutputStream out = new BufferedOutputStream (new FileOutputStream(obj_file));
 			int k;
 			byte[] buf = new byte[1024];
-			//System.out.println("debug");
 			while(true){
 			    k=in.read(buf);
 			    if(k == -1){
@@ -169,11 +166,8 @@ class ClientRequester implements Runnable{
 		
 
 	    }catch(UnknownHostException e){
-		
 	    }catch(IOException e){
-		
 	    }catch(IllegalArgumentException e){
-		
 	    }
 	}	    
     }
