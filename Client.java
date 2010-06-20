@@ -90,11 +90,13 @@ class ClientRequester implements Runnable{
 		}
 		File html_file = new File(html_dir+ "/" + file_name);
 		
-		PrintWriter pw = new PrintWriter(new OutputStreamWriter (new FileOutputStream(html_file)));
+		PrintWriter pw = new PrintWriter(new OutputStreamWriter (new FileOutputStream(html_file),"EUC-JP"));//set EUC-JP
 		BufferedReader rd = new BufferedReader(new InputStreamReader(urlconn.getInputStream(),"JISAutoDetect")); //auto charset
 		
 		String[] objs = new String[100];
+		String[] css = new String[100];
 		int i = 0;
+		int j = 0;
 		while(true){
 		    String line = rd.readLine();
 		    if(line == null){
@@ -109,14 +111,75 @@ class ClientRequester implements Runnable{
 			i++;
 		    }
 		    if(m2.find()){
-			objs[i] = m2.group(1); //saving css file name
-			i++;
+			css[j] = m2.group(1); //saving css file name
+			j++;
 		    }
 		    System.out.println(line);
 		    pw.println(line);
 		}
 		
 		pw.close();
+
+
+		while(true){ // download css files recursively
+		    if(j==0){
+			break;
+		    }else{	
+			String css_path = css[j-1];
+			j--;
+
+			URL url_obj = new URL("http://"+host+":"+port +"/"+directory+"/"+ css_path);
+			HttpURLConnection urlconn3 = (HttpURLConnection)url_obj.openConnection();
+			
+			urlconn3.setRequestMethod("GET");
+			urlconn3.connect();
+			
+			BufferedInputStream in = new BufferedInputStream(urlconn3.getInputStream());
+			
+			delm = css_path.lastIndexOf("/");
+			String sub_directory = "";
+			if(delm != -1 && delm != 0){
+			    sub_directory = css_path.substring(0,delm);
+			    file_name = css_path.substring(delm+1);
+			}else{
+			    file_name = css_path.substring(0);
+			}
+			
+			File css_dir = new File(cacheDir + "/" + directory + "/" +sub_directory);
+			flg = css_dir.canRead();
+			if(!flg){ // if a directory does not exist
+			    css_dir.mkdirs();
+			}
+			File css_file = new File(cacheDir + "/" + directory + "/" +sub_directory + "/" + file_name);
+			
+			//			BufferedOutputStream out = new BufferedOutputStream (new FileOutputStream(css_file));
+			PrintWriter pw2 = new PrintWriter(new OutputStreamWriter (new FileOutputStream(css_file),"EUC-JP"));//set EUC-JP
+			BufferedReader rd2 = new BufferedReader(new InputStreamReader(urlconn3.getInputStream(),"JISAutoDetect")); //auto charset
+			int k;
+			
+			while(true){
+			    String line = rd2.readLine();
+			    if(line == null){
+				break;
+			    }
+			    Pattern p = Pattern.compile("url\\((.*\\.(gif|png))\\)");//img files
+			    Pattern p2 = Pattern.compile("url\\((.*\\.css)\\)");//css files
+			    Matcher m = p.matcher(line);
+			    Matcher m2 = p2.matcher(line);
+			    if(m.find()){
+				objs[i] = m.group(1); //saving img file name
+				i++;
+			    }
+			    if(m2.find()){
+				css[j] = m2.group(1); //saving css file name
+				j++;
+			    }
+			    System.out.println(line);
+			    pw2.println(line);
+			}
+			pw2.close();
+		    }
+		}
 		
 		while(true){ // download object files
 		    if(i==0){
@@ -150,8 +213,8 @@ class ClientRequester implements Runnable{
 			File obj_file = new File(cacheDir + "/" + directory + "/" +sub_directory + "/" + file_name);
 			
 			BufferedOutputStream out = new BufferedOutputStream (new FileOutputStream(obj_file));
-			int k;
 			byte[] buf = new byte[1024];
+			int k;
 			while(true){
 			    k=in.read(buf);
 			    if(k == -1){
@@ -163,8 +226,6 @@ class ClientRequester implements Runnable{
 			out.close();
 		    }
 		}
-		
-
 	    }catch(UnknownHostException e){
 	    }catch(IOException e){
 	    }catch(IllegalArgumentException e){
